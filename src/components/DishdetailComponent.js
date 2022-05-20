@@ -18,6 +18,7 @@ import {
 } from "reactstrap";
 import { Control, LocalForm, Errors } from "react-redux-form";
 import { Link } from "react-router-dom";
+import { Loading } from "./LoadingComponent";
 
 const maxLength = (len) => (val) => !val || val.length <= len;
 const minLength = (len) => (val) => val && val.length >= len;
@@ -41,8 +42,13 @@ class CommentForm extends Component {
   }
 
   handleSubmit(values) {
-    console.log("Current State is: " + JSON.stringify(values));
-    alert("Current State is: " + JSON.stringify(values));
+    this.toggleModal();
+    this.props.addComment(
+      this.props.dishId,
+      values.rating,
+      values.author,
+      values.comment
+    );
   }
 
   render() {
@@ -53,6 +59,7 @@ class CommentForm extends Component {
             <span className="fa fa-pencil fa-lg"></span> Submit Comment{" "}
           </Button>
         </div>
+        <br></br>
         <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}> Submit Comment </ModalHeader>
           <ModalBody>
@@ -76,13 +83,13 @@ class CommentForm extends Component {
                 </Col>
               </Row>
               <Row className="form-group">
-                <Label htmlFor="yourname" md={12}>
+                <Label htmlFor="author" md={12}>
                   Your Name
                 </Label>
                 <Col md={12}>
                   <Control.text
-                    model=".yourname"
-                    name="yourname"
+                    model=".author"
+                    name="author"
                     placeholder="Your Name"
                     className="form-control"
                     validators={{
@@ -92,7 +99,7 @@ class CommentForm extends Component {
                   />
                   <Errors
                     className="text-danger"
-                    model=".yourname"
+                    model=".author"
                     show="touched"
                     messages={{
                       minLength: "Must be at least be three characters long",
@@ -142,7 +149,7 @@ function RenderDish({ dish }) {
   );
 }
 
-function RenderComments({ comments }) {
+function RenderComments({ comments, addComment, dishId }) {
   if (comments == null) {
     return <div></div>;
   } else {
@@ -171,14 +178,31 @@ function RenderComments({ comments }) {
           <h4>Comments</h4>
         </div>
         <ul className="list-unstyled">{comm}</ul>
-        <CommentForm />
+        <CommentForm dishId={dishId} addComment={addComment} />
       </React.Fragment>
     );
   }
 }
 
 const Dishdetail = (props) => {
-  if (props.dish != null) {
+  if (props.isLoading) {
+    return (
+      <div className="container">
+        <div className="row">
+          <Loading />
+        </div>
+      </div>
+    );
+  } else if (props.errMess) {
+    return (
+      <div className="container">
+        <div className="row">
+          <h4>{props.errMess}</h4>
+        </div>
+      </div>
+    );
+  }
+  else if (props.dish != null) {
     return (
       <div className="container">
         <div className="row">
@@ -198,7 +222,11 @@ const Dishdetail = (props) => {
             <RenderDish dish={props.dish} />
           </div>
           <div className="col-12 col-md-5 m-1">
-            <RenderComments comments={props.comments} />
+            <RenderComments
+              comments={props.comments}
+              addComment={props.addComment}
+              dishId={props.dish.id}
+            />
           </div>
         </div>
       </div>
