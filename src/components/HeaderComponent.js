@@ -109,7 +109,7 @@ class Header extends Component {
         </Navbar>
         <div className="jumbotron">
           <div className="container">
-            <div className="row row-header">
+            <div className="row row-header align-items-start">
               <div className="col-12 col-sm-6">
                 <h1>Ristorante con Fusion</h1>
                 <p>
